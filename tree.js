@@ -6,39 +6,53 @@ export default class Tree {
         this.root = null
     }
 
-    _traverse(element) {
+    _traverse(element, withparent = false) {
         if(this.root === null){
             
             this.root = new Node(element);
+            if(withparent){
+              return (this.root, this.root)
+            }
             return this.root
 
         } else {
             // traverse the tree
-            let currentNode = this.root
+            let currentNode = this.root;
+            let parentNode = currentNode;
             
             while (currentNode.left !== null || currentNode.right !== null) {
                 if (element >= currentNode.value) {
                   if (currentNode.right !== null) {
+                    parentNode = currentNode
+
                     currentNode = currentNode.right;
                   } else {
                     break;
                   }
                 } else {
                   if (currentNode.left !== null) {
+                    parentNode = currentNode
+
                     currentNode = currentNode.left;
                   } else {
                     break;
                   }
+
                 }
+
                 
               }
+
+        if(withparent){
+          return [currentNode, parentNode]
+        }
         return currentNode
         
             }
     }
 
     _addNode(element, currentNode) {
-        console.log(element)
+        // console.log(element)
         if(element >= currentNode.value) {
             currentNode.right = new Node(element)
         } else {
@@ -55,7 +69,7 @@ export default class Tree {
             if (this.root === null) {
               this.root = new Node(element);
             } else {
-              let currentNode = this._traverse(element, this.root);
+              let currentNode = this._traverse(element);
               this._addNode(element, currentNode);
             }
           });
@@ -65,29 +79,12 @@ export default class Tree {
 
     insert(number) {
         // traverse the tree and add the number to the tree
-        let currentNode = this._traverse(number, this.root);
+        let currentNode = this._traverse(number);
         this._addNode(number, currentNode);
     };
 
     delete(number) {
-      let currentNode = this._traverse(number, this.root);
-      const right = currentNode.right;
-      const left = currentNode.left;
-
-      // we find the parent of that node, and we'll get rid of those nodes
-      while (currentNode.left !== null || currentNode.right !== null) {
-        if (element >= currentNode.left.value ) {
-          
-            currentNode = currentNode.right;
-          
-        } else {
-          
-            currentNode = currentNode.left;
-          
-        }
-        
-      }
-      console.log(currentNode)
-
+      console.log(this._traverse(number, true))
+      
     }
   }

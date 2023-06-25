@@ -1,5 +1,6 @@
 import mergeSort from "./mergesort.js"
 import Node from "./node.js"
+import prettyPrint from "./prettyprint.js";
 
 export default class Tree {
     constructor() {
@@ -8,7 +9,6 @@ export default class Tree {
 
     _traverseForBuilding(element) {
         if(this.root === null){
-            
             this.root = new Node(element);
             return this.root
 
@@ -29,12 +29,9 @@ export default class Tree {
                   } else {
                     break;
                   }
-
                 }
-
               }
         return currentNode
-        
             }
     }
 
@@ -61,13 +58,12 @@ export default class Tree {
           });
         }
     
-
-
     insert(number) {
         // traverse the tree and add the number to the tree
         let currentNode = this._traverseForBuilding(number);
         this._addNode(number, currentNode);
     };
+
 
     _traverseForDeleting(node, number, parent=node) {
       if(node===null) {
@@ -81,7 +77,6 @@ export default class Tree {
         return [node, parent]
       }
     }
-
 
     // using the Breadth-Search-Method
     _findMinimum(nodes) {
@@ -104,7 +99,6 @@ export default class Tree {
           queue.push(current.right)
         } 
       }
-      
       return minimum
     }
 
@@ -123,9 +117,8 @@ export default class Tree {
         } else if(parent.right === node) {
           parent.right = null
         }
-      } 
-      // 2nd if it has 1 child node, connect its child(s) and its parent
-      else if((node.left !== null || node.right !== null) && !(node.left !==null && node.right!==null)) {
+      } else if((node.left !== null || node.right !== null) && !(node.left !==null && node.right!==null)) {
+        // 2nd if it has 1 child node, connect its child(s) and its parent
         if(parent.left === node) {
           if(node.left === null) {
             parent.left = node.right
@@ -139,10 +132,7 @@ export default class Tree {
             parent.right = node.left
           } 
         }
-      } 
-      // 3rd if it has 2 child nodes, set right side tree's minimum value the in place of the deleted node
-  
-      else {
+      } else {
         // we have a minimum node
         let minimum_node = { ...this._findMinimum(node.right)}
         minimum_node.left = node.left
@@ -156,15 +146,16 @@ export default class Tree {
         }
 
         // delete the copy
-        const parentOfNewNode = this._traverseForDeleting(minimum_node.right, minimum_node.value, true)
-        if(parentOfNewNode[1].left.value === minimum_node.value ) {
-          parentOfNewNode[1].left = null
-        } else if(parentOfNewNode[1].right.value === minimum_node.value) {
-          parentOfNewNode[1].right = null
+        // FUCK THIS SHIT SO HARD, I*M DONE!!!!!!!!!!!!!!!!!!!! FUCK ALL THE TREES
+        const parentOfNewNode = this._traverseForDeleting(minimum_node.right, minimum_node.value)
+        console.log([minimum_node.right, minimum_node.value])
+        if(parentOfNewNode[0].left.value === minimum_node.value ) {
+          parentOfNewNode[0].left = null
+        } else if(parentOfNewNode[0].right.value === minimum_node.value) {
+          parentOfNewNode[0].right = null
 
         }
       }
-
     }
 
     find(number) {
@@ -177,32 +168,112 @@ export default class Tree {
     }
 
     // node -> root
-    depth(number, node=this.root) {
-      if(node.left===null || node.right===null){
-        return 0
-      } else if(node.value === number) {
-        return 0
-      } else {
-        return this.depth(number, node.left) + this.depth(number, node.right) + 1
+    height(number, node=this.root) {
+      let queue = [];
+      queue.push({"node": node, "depth": 0})
+
+      while(queue.length > 0) {
+        const current = queue.shift()
+        // first we check the node's value
+        if (current.node.value === number) {
+          return current.depth;
+        }
+
+        // and we continue traversing
+        if(current.node.left !== null) {
+          queue.push({"node": current.node.left, "depth": current.depth + 1})
+        } 
+        if(current.node.right !== null) {
+          queue.push({"node": current.node.right, "depth": current.depth+1})
+        } 
       }
     }
 
     // node -> leaves
-    height(number, node =this.root) {
-      function getTotalHeight(node) {
-        if(node===null) {
-          return 0
-        }
-        let left = getTotalHeight(node.left)
-        let right = getTotalHeight(node.right)
-        if(left>right) {
-          return left + 1
-        } else {
-          return right + 1
-        }
-
+    depth(number, node =this.root) {      
+        function totalDepth(node) {      
+          if (node === null) {
+            return 0;
+          } else {
+            const leftDepth = totalDepth(node.left);
+            const rightDepth = totalDepth(node.right);
+            return Math.max(leftDepth, rightDepth) + 1;
+          }
+        } 
+        console.log(totalDepth(node) - this.height(number) - 1)
       }
-      console.log(this.depth(7))
+
+    inorder() {
+      let result= [];
+      function traverse(node) {
+        if(node !== null) {
+          const left = traverse(node.left)
+          result.push(node.value)
+          const right = (traverse(node.right))
+        } 
+      }
+      traverse(this.root)
+      console.log(result)
+      return result
+    }
+
+    preorder() {
+      let result = []
+      function traverse(node) {
+        if(node !== null) {
+          result.push(node.value)
+          const left = traverse(node.left)
+          const right = traverse(node.right)
+        } 
+      }
+
+      traverse(this.root)
+      console.log(result)
+      return result
+    }
+
+    postorder() {
+      let result = []
+      function traverse(node) {
+        if(node !== null) {
+          const left = traverse(node.left)
+          const right = (traverse(node.right))
+          result.push(node.value)
+        } 
+      }
+      traverse(this.root)
+      console.log(result)
+      return result
+    }
+
+    isbalanced() {
+      function height(node) {
+        if(node==null){
+          return 0
+        } else {
+          return Math.max(height(node.left), height(node.right)) + 1
+        }
+      }
+      console.log(height(this.root.left) === height(this.root.right)) 
+    }
+
+    rebalance() {
+      const values = mergeSort(this.inorder())
+      let new_list = []
+      function generateList(l){
+        if(l===[]){
+          return 0
+        } else {
+          const mid = Math.floor(l.length/2)
+          new_list.push(l[mid])
+          return generateList(l.slice(0, mid)) + generateList(l.slice(mid))
+        }
+      }
+      prettyPrint(this.root)
+      this.root = null
+      this.buildTree(new_list)
+      prettyPrint(this.root)
+      this.isbalanced()
     }
 
   }
